@@ -1166,6 +1166,23 @@ int wmain(int argc, wchar_t* argv[]) {
                                 break;
                             }
                         }
+                        // A display mode change mid-take (resolution, scale)
+                        // hands over frames of a new size. The encoder was set
+                        // up for the first one, and CopyResource between
+                        // mismatched textures is undefined, so end the take
+                        // with a clear error instead of recording garbage.
+                        D3D11_TEXTURE2D_DESC frameDesc{};
+                        D3D11_TEXTURE2D_DESC latestDesc{};
+                        wgcTexture->GetDesc(&frameDesc);
+                        latestFrameTexture->GetDesc(&latestDesc);
+                        if (frameDesc.Width != latestDesc.Width || frameDesc.Height != latestDesc.Height) {
+                            std::cerr << "ERROR: Capture size changed mid-recording (" << latestDesc.Width
+                                      << "x" << latestDesc.Height << " -> " << frameDesc.Width << "x"
+                                      << frameDesc.Height << "); ending the take" << std::endl;
+                            encodeFailed = true;
+                            control.requestStop();
+                            break;
+                        }
                         // The wedge risk this class exists to avoid: this call
                         // can block inside the display driver and never return
                         // (#252, still true of PR #305's DXGI path on some

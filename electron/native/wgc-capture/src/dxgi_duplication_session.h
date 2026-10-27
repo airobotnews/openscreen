@@ -63,10 +63,14 @@ public:
     ID3D11DeviceContext* context() const { return d3dContext_.Get(); }
 
 private:
+    bool findOutput(HMONITOR monitor);
     bool createD3DDevice();
-    bool createDuplication(HMONITOR monitor);
+    bool createDuplication();
     bool ensureCopyTexture();
     bool reacquire();
+    // WGC draws the pointer itself; Desktop Duplication never does, so with the
+    // system cursor mode it is drawn here, over the private copy, through GDI.
+    void drawCursor();
     // LastPresentTime and QueryPerformanceCounter share the QPC clock, which is
     // the same clock WGC's SystemRelativeTime is derived from -- and main.cpp
     // only ever uses the value as a delta from the first frame, so a monotonic
@@ -75,7 +79,7 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice_;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dContext_;
-    Microsoft::WRL::ComPtr<IDXGIAdapter> adapter_;
+    Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter_;
     Microsoft::WRL::ComPtr<IDXGIOutput1> output_;
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> duplication_;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> copyTexture_;
@@ -87,8 +91,7 @@ private:
     int fps_ = 60;
     bool captureCursor_ = false;
     bool started_ = false;
-    bool warnedCursorIgnored_ = false;
-    bool warnedAccessLost_ = false;
-    bool exhausted_ = false;
-    uint64_t reacquireCount_ = 0;
+    RECT desktopRect_{};
+    bool warnedReacquireFailed_ = false;
+    ULONGLONG lastReacquireAttemptMs_ = 0;
 };

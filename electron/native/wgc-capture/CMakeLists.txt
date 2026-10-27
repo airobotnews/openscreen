@@ -81,6 +81,7 @@ target_link_libraries(wgc-capture PRIVATE
   avrt
   d3d11
   dxgi
+  gdi32
   mf
   mfplat
   mfreadwrite
