@@ -333,7 +333,7 @@ void DxgiDuplicationSession::drawCursor() {
     // look the way they do on screen.
     DrawIconEx(dc, ci.ptScreenPos.x - desktopRect_.left - static_cast<int>(icon.xHotspot),
                ci.ptScreenPos.y - desktopRect_.top - static_cast<int>(icon.yHotspot), ci.hCursor, 0,
-               0, 0, nullptr, DI_NORMAL | DI_DEFAULTSIZE);
+               0, 0, nullptr, DI_NORMAL);
     surface->ReleaseDC(nullptr);
 }
 
